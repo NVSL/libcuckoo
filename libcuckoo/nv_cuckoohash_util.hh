@@ -3,7 +3,7 @@
 #ifndef _CUCKOOHASH_UTIL_HH
 #define _CUCKOOHASH_UTIL_HH
 
-#include "cuckoohash_config.hh" // for LIBCUCKOO_DEBUG
+#include "nv_cuckoohash_config.hh" // for LIBCUCKOO_DEBUG
 #include <exception>
 #include <thread>
 #include <utility>

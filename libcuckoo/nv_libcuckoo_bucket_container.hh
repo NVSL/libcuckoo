@@ -10,7 +10,7 @@
 #include <type_traits>
 #include <utility>
 
-#include "cuckoohash_util.hh"
+#include "nv_cuckoohash_util.hh"
 
 /**
  * libcuckoo_bucket_container manages storage of key-value pairs for the table.

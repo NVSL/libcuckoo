@@ -7,10 +7,10 @@
 #include <string>
 #include <utility>
 
-#include <libcuckoo/cuckoohash_map.hh>
+#include <libcuckoo/nv_cuckoohash_map.hh>
 
-typedef cuckoohash_map<std::string, std::string> InnerTable;
-typedef cuckoohash_map<std::string, std::unique_ptr<InnerTable>> OuterTable;
+typedef nv_cuckoohash_map<std::string, std::string> InnerTable;
+typedef nv_cuckoohash_map<std::string, std::unique_ptr<InnerTable>> OuterTable;
 
 int main() {
   OuterTable tbl;

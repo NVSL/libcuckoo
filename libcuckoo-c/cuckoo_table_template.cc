@@ -12,7 +12,7 @@
 #include <memory>
 #include <utility>
 
-#include <libcuckoo/cuckoohash_map.hh>
+#include <libcuckoo/nv_cuckoohash_map.hh>
 
 // Helper macros, we take care of undefining these
 #define PASTE2(a, b) a##b
@@ -23,7 +23,7 @@
 extern "C" {
 #endif
 
-typedef cuckoohash_map<CUCKOO_KEY_TYPE, CUCKOO_MAPPED_TYPE> tbl_t;
+typedef nv_cuckoohash_map<CUCKOO_KEY_TYPE, CUCKOO_MAPPED_TYPE> tbl_t;
 
 struct CUCKOO_TABLE_NAME {
   tbl_t t;

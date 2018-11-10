@@ -1,7 +1,7 @@
 /** \file */
 
-#ifndef _CUCKOOHASH_MAP_HH
-#define _CUCKOOHASH_MAP_HH
+#ifndef _NV_CUCKOOHASH_MAP_HH
+#define _NV_CUCKOOHASH_MAP_HH
 
 #include <algorithm>
 #include <array>
@@ -23,9 +23,9 @@
 #include <utility>
 #include <vector>
 
-#include "cuckoohash_config.hh"
-#include "cuckoohash_util.hh"
-#include "libcuckoo_bucket_container.hh"
+#include "nv_cuckoohash_config.hh"
+#include "nv_cuckoohash_util.hh"
+#include "nv_libcuckoo_bucket_container.hh"
 
 /**
  * A concurrent hash table
@@ -41,7 +41,7 @@ template <class Key, class T, class Hash = std::hash<Key>,
           class KeyEqual = std::equal_to<Key>,
           class Allocator = std::allocator<std::pair<const Key, T>>,
           std::size_t SLOT_PER_BUCKET = LIBCUCKOO_DEFAULT_SLOT_PER_BUCKET>
-class cuckoohash_map {
+class nv_cuckoohash_map {
 private:
   // Type of the partial key
   using partial_t = uint8_t;
@@ -96,7 +96,7 @@ public:
    * @param equal equality function instance to use
    * @param alloc allocator instance to use
    */
-  cuckoohash_map(size_type n = LIBCUCKOO_DEFAULT_SIZE, const Hash &hf = Hash(),
+  nv_cuckoohash_map(size_type n = LIBCUCKOO_DEFAULT_SIZE, const Hash &hf = Hash(),
                  const KeyEqual &equal = KeyEqual(),
                  const Allocator &alloc = Allocator())
       : hash_fn_(hf), eq_fn_(equal), buckets_(reserve_calc(n), alloc),
@@ -120,11 +120,11 @@ public:
    * @param alloc allocator instance to use
    */
   template <typename InputIt>
-  cuckoohash_map(InputIt first, InputIt last,
+  nv_cuckoohash_map(InputIt first, InputIt last,
                  size_type n = LIBCUCKOO_DEFAULT_SIZE, const Hash &hf = Hash(),
                  const KeyEqual &equal = KeyEqual(),
                  const Allocator &alloc = Allocator())
-      : cuckoohash_map(n, hf, equal, alloc) {
+      : nv_cuckoohash_map(n, hf, equal, alloc) {
     for (; first != last; ++first) {
       insert(first->first, first->second);
     }
@@ -136,8 +136,8 @@ public:
    *
    * @param other the map being copied
    */
-  cuckoohash_map(const cuckoohash_map &other)
-      : cuckoohash_map(other, std::allocator_traits<allocator_type>::
+  nv_cuckoohash_map(const nv_cuckoohash_map &other)
+      : nv_cuckoohash_map(other, std::allocator_traits<allocator_type>::
                                   select_on_container_copy_construction(
                                       other.get_allocator())) {}
 
@@ -148,7 +148,7 @@ public:
    * @param other the map being copied
    * @param alloc the allocator instance to use with the map
    */
-  cuckoohash_map(const cuckoohash_map &other, const Allocator &alloc)
+  nv_cuckoohash_map(const nv_cuckoohash_map &other, const Allocator &alloc)
       : hash_fn_(other.hash_fn_), eq_fn_(other.eq_fn_),
         buckets_(other.buckets_, alloc), all_locks_(alloc),
         minimum_load_factor_(other.minimum_load_factor()),
@@ -166,8 +166,8 @@ public:
    *
    * @param other the map being moved
    */
-  cuckoohash_map(cuckoohash_map &&other)
-      : cuckoohash_map(std::move(other), other.get_allocator()) {}
+  nv_cuckoohash_map(nv_cuckoohash_map &&other)
+      : nv_cuckoohash_map(std::move(other), other.get_allocator()) {}
 
   /**
    * Move constructor with separate allocator. If the map being moved is being
@@ -176,7 +176,7 @@ public:
    * @param other the map being moved
    * @param alloc the allocator instance to use with the map
    */
-  cuckoohash_map(cuckoohash_map &&other, const Allocator &alloc)
+  nv_cuckoohash_map(nv_cuckoohash_map &&other, const Allocator &alloc)
       : hash_fn_(std::move(other.hash_fn_)), eq_fn_(std::move(other.eq_fn_)),
         buckets_(std::move(other.buckets_), alloc), all_locks_(alloc),
         minimum_load_factor_(other.minimum_load_factor()),
@@ -197,18 +197,18 @@ public:
    * @param equal equality function instance to use
    * @param alloc allocator instance to use
    */
-  cuckoohash_map(std::initializer_list<value_type> init,
+  nv_cuckoohash_map(std::initializer_list<value_type> init,
                  size_type n = LIBCUCKOO_DEFAULT_SIZE, const Hash &hf = Hash(),
                  const KeyEqual &equal = KeyEqual(),
                  const Allocator &alloc = Allocator())
-      : cuckoohash_map(init.begin(), init.end(), n, hf, equal, alloc) {}
+      : nv_cuckoohash_map(init.begin(), init.end(), n, hf, equal, alloc) {}
 
   /**
    * Exchanges the contents of the map with those of @p other
    *
    * @param other the map to exchange contents with
    */
-  void swap(cuckoohash_map &other) noexcept {
+  void swap(nv_cuckoohash_map &other) noexcept {
     std::swap(hash_fn_, other.hash_fn_);
     std::swap(eq_fn_, other.eq_fn_);
     buckets_.swap(other.buckets_);
@@ -230,7 +230,7 @@ public:
    * @param other the map to assign from
    * @return @c *this
    */
-  cuckoohash_map &operator=(const cuckoohash_map &other) {
+  nv_cuckoohash_map &operator=(const nv_cuckoohash_map &other) {
     hash_fn_ = other.hash_fn_;
     eq_fn_ = other.eq_fn_;
     buckets_ = other.buckets_;
@@ -247,7 +247,7 @@ public:
    * @param other the map to assign from
    * @return @c *this
    */
-  cuckoohash_map &operator=(cuckoohash_map &&other) {
+  nv_cuckoohash_map &operator=(nv_cuckoohash_map &&other) {
     hash_fn_ = std::move(other.hash_fn_);
     eq_fn_ = std::move(other.eq_fn_);
     buckets_ = std::move(other.buckets_);
@@ -263,7 +263,7 @@ public:
    * @param ilist an initializer list to assign from
    * @return @c *this
    */
-  cuckoohash_map &operator=(std::initializer_list<value_type> ilist) {
+  nv_cuckoohash_map &operator=(std::initializer_list<value_type> ilist) {
     clear();
     for (const auto &item : ilist) {
       insert(item.first, item.second);
@@ -671,7 +671,7 @@ public:
 private:
   // Constructor helpers
 
-  void add_locks_from_other(const cuckoohash_map &other) {
+  void add_locks_from_other(const nv_cuckoohash_map &other) {
     locks_t &other_locks = other.get_current_locks();
     all_locks_.emplace_back(other_locks.size(), spinlock(), get_allocator());
     std::copy(other_locks.begin(), other_locks.end(),
@@ -830,7 +830,7 @@ private:
   };
 
   struct AllUnlocker {
-    void operator()(cuckoohash_map *map) const {
+    void operator()(nv_cuckoohash_map *map) const {
       for (auto it = first_locked; it != map->all_locks_.end(); ++it) {
         locks_t &locks = *it;
         for (spinlock &lock : locks) {
@@ -842,7 +842,7 @@ private:
     typename all_locks_t::iterator first_locked;
   };
 
-  using AllLocksManager = std::unique_ptr<cuckoohash_map, AllUnlocker>;
+  using AllLocksManager = std::unique_ptr<nv_cuckoohash_map, AllUnlocker>;
 
   // This exception is thrown whenever we try to lock a bucket, but the
   // hashpower is not what was expected
@@ -1718,7 +1718,7 @@ private:
     }
     // Creates a new hash table with hashpower new_hp and adds all
     // the elements from the old buckets.
-    cuckoohash_map new_map(hashsize(new_hp) * slot_per_bucket(),
+    nv_cuckoohash_map new_map(hashsize(new_hp) * slot_per_bucket(),
                            hash_function(), key_eq(), get_allocator());
 
     parallel_exec(0, hashsize(hp), [this, &new_map](size_type i, size_type end,
@@ -1884,18 +1884,18 @@ public:
     /** @name Type Declarations */
     /**@{*/
 
-    using key_type = typename cuckoohash_map::key_type;
-    using mapped_type = typename cuckoohash_map::mapped_type;
-    using value_type = typename cuckoohash_map::value_type;
-    using size_type = typename cuckoohash_map::size_type;
-    using difference_type = typename cuckoohash_map::difference_type;
-    using hasher = typename cuckoohash_map::hasher;
-    using key_equal = typename cuckoohash_map::key_equal;
-    using allocator_type = typename cuckoohash_map::allocator_type;
-    using reference = typename cuckoohash_map::reference;
-    using const_reference = typename cuckoohash_map::const_reference;
-    using pointer = typename cuckoohash_map::pointer;
-    using const_pointer = typename cuckoohash_map::const_pointer;
+    using key_type = typename nv_cuckoohash_map::key_type;
+    using mapped_type = typename nv_cuckoohash_map::mapped_type;
+    using value_type = typename nv_cuckoohash_map::value_type;
+    using size_type = typename nv_cuckoohash_map::size_type;
+    using difference_type = typename nv_cuckoohash_map::difference_type;
+    using hasher = typename nv_cuckoohash_map::hasher;
+    using key_equal = typename nv_cuckoohash_map::key_equal;
+    using allocator_type = typename nv_cuckoohash_map::allocator_type;
+    using reference = typename nv_cuckoohash_map::reference;
+    using const_reference = typename nv_cuckoohash_map::const_reference;
+    using pointer = typename nv_cuckoohash_map::pointer;
+    using const_pointer = typename nv_cuckoohash_map::const_pointer;
 
     /**
      * A constant iterator over a @ref locked_table, which allows read-only
@@ -2030,8 +2030,8 @@ public:
      */
     class iterator : public const_iterator {
     public:
-      using pointer = typename cuckoohash_map::pointer;
-      using reference = typename cuckoohash_map::reference;
+      using pointer = typename nv_cuckoohash_map::pointer;
+      using reference = typename nv_cuckoohash_map::reference;
 
       iterator() {}
 
@@ -2085,7 +2085,7 @@ public:
     /**@{*/
 
     static constexpr size_type slot_per_bucket() {
-      return cuckoohash_map::slot_per_bucket();
+      return nv_cuckoohash_map::slot_per_bucket();
     }
 
     /**@}*/
@@ -2408,7 +2408,7 @@ public:
     // The constructor locks the entire table. We keep this constructor
     // private (but expose it to the cuckoohash_map class), since we don't
     // want users calling it.
-    locked_table(cuckoohash_map &map) noexcept
+    locked_table(nv_cuckoohash_map &map) noexcept
         : map_(map),
           all_locks_manager_(map.snapshot_and_lock_all(normal_mode())) {}
 
@@ -2425,11 +2425,11 @@ public:
     locks_t &get_current_locks() { return map_.get().get_current_locks(); }
 
     // A reference to the map owned by the table
-    std::reference_wrapper<cuckoohash_map> map_;
+    std::reference_wrapper<nv_cuckoohash_map> map_;
     // A manager for all the locks we took on the table.
     AllLocksManager all_locks_manager_;
 
-    friend class cuckoohash_map;
+    friend class nv_cuckoohash_map;
 
     friend std::ostream &operator<<(std::ostream &os, const locked_table &lt) {
       os << lt.buckets();
@@ -2479,12 +2479,12 @@ namespace std {
 template <class Key, class T, class Hash, class KeyEqual, class Allocator,
           std::size_t SLOT_PER_BUCKET>
 void swap(
-    cuckoohash_map<Key, T, Hash, KeyEqual, Allocator, SLOT_PER_BUCKET> &lhs,
-    cuckoohash_map<Key, T, Hash, KeyEqual, Allocator, SLOT_PER_BUCKET>
+    nv_cuckoohash_map<Key, T, Hash, KeyEqual, Allocator, SLOT_PER_BUCKET> &lhs,
+    nv_cuckoohash_map<Key, T, Hash, KeyEqual, Allocator, SLOT_PER_BUCKET>
         &rhs) noexcept {
   lhs.swap(rhs);
 }
 
 } // namespace std
 
-#endif // _CUCKOOHASH_MAP_HH
+#endif // _NV_CUCKOOHASH_MAP_HH

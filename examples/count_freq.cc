@@ -11,10 +11,10 @@
 #include <utility>
 #include <vector>
 
-#include <libcuckoo/cuckoohash_map.hh>
+#include <libcuckoo/nv_cuckoohash_map.hh>
 
 typedef uint32_t KeyType;
-typedef cuckoohash_map<KeyType, size_t> Table;
+typedef nv_cuckoohash_map<KeyType, size_t> Table;
 const size_t thread_num = 8;
 const size_t total_inserts = 10000000;
 

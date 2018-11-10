@@ -1,10 +1,10 @@
 #include <iostream>
 #include <string>
 
-#include <libcuckoo/cuckoohash_map.hh>
+#include <libcuckoo/nv_cuckoohash_map.hh>
 
 int main() {
-  cuckoohash_map<int, std::string> Table;
+  nv_cuckoohash_map<int, std::string> Table;
 
   for (int i = 0; i < 100; i++) {
     Table.insert(i, "hello");
