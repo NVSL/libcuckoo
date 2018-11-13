@@ -22,6 +22,7 @@
 #include <type_traits>
 #include <utility>
 #include <vector>
+#include "../../../../src/savitar.hpp"
 
 #include "nv_cuckoohash_config.hh"
 #include "nv_cuckoohash_util.hh"
@@ -41,7 +42,7 @@ template <class Key, class T, class Hash = std::hash<Key>,
           class KeyEqual = std::equal_to<Key>,
           class Allocator = std::allocator<std::pair<const Key, T>>,
           std::size_t SLOT_PER_BUCKET = LIBCUCKOO_DEFAULT_SLOT_PER_BUCKET>
-class nv_cuckoohash_map {
+class nv_cuckoohash_map : public PersistentObject {
 private:
   // Type of the partial key
   using partial_t = uint8_t;
@@ -202,6 +203,35 @@ public:
                  const KeyEqual &equal = KeyEqual(),
                  const Allocator &alloc = Allocator())
       : nv_cuckoohash_map(init.begin(), init.end(), n, hf, equal, alloc) {}
+
+  /**
+   * Creates a new cuckohash_map instance
+   *
+   * @param n the number of elements to reserve space for initially
+   * @param hf hash function instance to use
+   * @param equal equality function instance to use
+   * @param alloc allocator instance to use
+   */
+  nv_cuckoohash_map(uuid_t id, size_type n = LIBCUCKOO_DEFAULT_SIZE,
+                 const Hash &hf = Hash(),
+                 const KeyEqual &equal = KeyEqual(),
+                 const Allocator &alloc = Allocator())
+      : PersistentObject(id), hash_fn_(hf), eq_fn_(equal),
+        buckets_(reserve_calc(n), alloc), all_locks_(get_allocator()),
+        minimum_load_factor_(LIBCUCKOO_DEFAULT_MINIMUM_LOAD_FACTOR),
+        maximum_hashpower_(LIBCUCKOO_NO_MAXIMUM_HASHPOWER) {
+    all_locks_.emplace_back(std::min(bucket_count(), size_type(kMaxNumLocks)),
+                            spinlock(), get_allocator());
+  }
+
+  virtual uint64_t Log(uint64_t tag, uint64_t *args) {
+    return 0;
+  }
+
+  virtual size_t Play(uint64_t tag, uint64_t *args, bool dry) {
+    return 0;
+  }
+
 
   /**
    * Exchanges the contents of the map with those of @p other
