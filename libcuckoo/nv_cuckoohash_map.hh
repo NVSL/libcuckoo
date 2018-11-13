@@ -225,14 +225,50 @@ public:
   }
 
   virtual uint64_t Log(uint64_t tag, uint64_t *args) {
-    return 0;
+    int vector_size = 0;
+    ArgVector vector[4];
+
+    switch (tag) {
+        case InsertTag:
+            vector[0].addr = &tag;
+            vector[0].len = sizeof(tag);
+            vector[1].addr = (void *)args[0];
+            vector[1].len = strlen((char *)args[0]) + 1;
+            vector[2].addr = (void *)args[1];
+            vector[2].len = strlen((char *)args[1]) + 1;
+            vector_size = 3;
+            break;
+        default:
+            assert(false);
+            break;
+    }
+    return AppendLog(vector, vector_size);
   }
 
   virtual size_t Play(uint64_t tag, uint64_t *args, bool dry) {
-    return 0;
+    size_t bytes_processed = 0;
+    switch (tag) {
+        case InsertTag:
+            {
+            char *key = (char *)args;
+            char *value = (char *)args + strlen(key) + 1;
+            if (!dry) insert(key, value);
+            bytes_processed = strlen(key) + strlen(value) + 2;
+            }
+            break;
+        default:
+            assert(false);
+            break;
+    }
+    return bytes_processed;
   }
 
+private:
+  enum MethodTags {
+      InsertTag = 1,
+  };
 
+public:
   /**
    * Exchanges the contents of the map with those of @p other
    *
@@ -565,6 +601,7 @@ public:
         del_from_bucket(pos.index, pos.slot);
       }
     }
+    Savitar_thread_wait(this, this->log);
     return pos.status == ok;
   }
 
@@ -635,6 +672,7 @@ public:
    * upsert with a functor that does nothing.
    */
   template <typename K, typename... Args> bool insert(K &&key, Args &&... val) {
+    Savitar_thread_notify(4, this, InsertTag, std::forward<K>(key), std::forward<Args>(val)...);
     return upsert(std::forward<K>(key), [](mapped_type &) {},
                   std::forward<Args>(val)...);
   }
